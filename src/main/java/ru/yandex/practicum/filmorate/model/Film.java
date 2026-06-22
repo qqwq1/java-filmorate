@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Data
 public class Film {
-    private final static int MAX_DESCRIPTION_LENGTH = 200;
+    private static final int MAX_DESCRIPTION_LENGTH = 200;
     private Long id;
 
     @NotBlank(message = "Название фильма не может быть пустым")
