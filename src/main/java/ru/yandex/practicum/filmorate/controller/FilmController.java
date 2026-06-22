@@ -21,7 +21,7 @@ import java.util.Optional;
 public class FilmController {
 
     private final Map<Long, Film> filmsStorage = new HashMap<>();
-    private final LocalDate START_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
+    private static final LocalDate START_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
 
     @GetMapping
     public ResponseEntity<?> findAll() {
