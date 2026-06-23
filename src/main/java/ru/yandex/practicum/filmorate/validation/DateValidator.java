@@ -19,6 +19,7 @@ public class DateValidator implements ConstraintValidator<ReleaseAfter, LocalDat
     public boolean isValid(LocalDate releaseDate, ConstraintValidatorContext constraintValidatorContext) {
         if (releaseDate != null) {
             return releaseDate.isAfter(startDate);
-        } return true;
+        }
+        return true;
     }
 }
