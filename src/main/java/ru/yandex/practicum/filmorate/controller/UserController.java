@@ -1,14 +1,16 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.groups.Create;
+import ru.yandex.practicum.filmorate.groups.Update;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -20,19 +22,14 @@ public class UserController {
     private final Map<Long, User> users = new HashMap<>();
 
     @GetMapping
-    public ResponseEntity<?> findAll() {
+    public ResponseEntity<Collection<User>> findAll() {
         return ResponseEntity.ok()
                 .body(users.values());
     }
 
     @PostMapping
-    public ResponseEntity<?> addUser(@Valid @RequestBody User userToAdd) {
-        if (userToAdd.getEmail().isBlank()) {
-            throw new ValidationException("Электронная почта не может быть пустой");
-        }
-        if (userToAdd.getLogin().isBlank()) {
-            throw new ValidationException("Логин не может быть пустым");
-        }
+    public ResponseEntity<User> addUser(@Validated(Create.class) @RequestBody User userToAdd) {
+
         Optional<String> userName = Optional.ofNullable(userToAdd.getName());
         if (userName.orElse("").isBlank()) {
             userToAdd.setName(userToAdd.getLogin());
@@ -55,7 +52,7 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateUser(@Valid @RequestBody User userToUpdate) {
+    public ResponseEntity<User> updateUser(@Validated(Update.class) @RequestBody User userToUpdate) {
         User oldUser = getUserOrElseThrow(userToUpdate.getId());
 
         if (userToUpdate.getEmail() != null) {
@@ -78,6 +75,7 @@ public class UserController {
 
     private User getUserOrElseThrow(Long userId) {
         return Optional.ofNullable(users.get(userId))
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"
+                        , userId.toString()));
     }
 }
