@@ -75,7 +75,7 @@ public class UserController {
 
     private User getUserOrElseThrow(Long userId) {
         return Optional.ofNullable(users.get(userId))
-                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"
-                        , userId.toString()));
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден",
+                        userId.toString()));
     }
 }
