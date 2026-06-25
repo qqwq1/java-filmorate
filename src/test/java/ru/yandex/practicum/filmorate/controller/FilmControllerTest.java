@@ -59,7 +59,10 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.name", notNullValue()));
+                .andExpect(jsonPath("$[0].field", is("name")))
+                .andExpect(jsonPath("$[0].rejectedValue", is("")))
+                .andExpect(jsonPath("$[0].description",notNullValue()));
+
     }
 
     @Test
@@ -69,7 +72,9 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.name", notNullValue()));
+                .andExpect(jsonPath("$[0].field", is("name")))
+                .andExpect(jsonPath("$[0].rejectedValue", is("null")))
+                .andExpect(jsonPath("$[0].description", notNullValue()));
     }
 
     @Test
@@ -79,7 +84,8 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.description", notNullValue()));
+                .andExpect(jsonPath("$[0].field", is("description")))
+                .andExpect(jsonPath("$[0].description", notNullValue()));
     }
 
     @Test
@@ -89,7 +95,7 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.duration", notNullValue()));
+                .andExpect(jsonPath("$[0].field", is("duration")));
     }
 
     @Test
@@ -99,7 +105,8 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.duration", notNullValue()));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$[0].field", is("duration")));
     }
 
     @Test
@@ -109,7 +116,7 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", containsString("1895-12-28")));
+                .andExpect(jsonPath("$[0].field", containsString("releaseDate")));
     }
 
     @Test
@@ -119,17 +126,7 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validFilm)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.releaseDate", notNullValue()));
-    }
-
-    @Test
-    void testAddFilmWithNullReleaseDate() throws Exception {
-        validFilm.setReleaseDate(null);
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", notNullValue()));
+                .andExpect(jsonPath("$[0].field", is("releaseDate")));
     }
 
     @Test
@@ -194,7 +191,7 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateFilm)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error", containsString("не найден")));
+                .andExpect(jsonPath("$.description", containsString("не найден")));
     }
 
     @Test

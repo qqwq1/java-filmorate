@@ -13,7 +13,7 @@ public class User {
 
     @Email(message = "Email не соответствует формату",
             groups = {Create.class, Update.class})
-    @NotNull(message = "Электронная почта не может быть пустой",
+    @NotBlank(message = "Электронная почта не может быть пустой",
             groups = Create.class)
     private String email;
 
@@ -22,7 +22,7 @@ public class User {
             message = "Логин может содержать только латинские буквы, цифры, точки, дефисы и подчеркивания",
             groups = {Create.class, Update.class}
     )
-    @NotNull(message = "Логин не может быть пустым",
+    @NotBlank(message = "Логин не может быть пустым",
             groups = Create.class)
     private String login;
     private String name;

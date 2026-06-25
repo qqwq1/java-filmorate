@@ -80,7 +80,8 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.email", notNullValue()));
+                .andExpect(jsonPath("$[0].field", is("email")))
+                .andExpect(jsonPath("$[0].description",notNullValue()));
     }
 
     @Test
@@ -99,7 +100,8 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.login", notNullValue()));
+                .andExpect(jsonPath("$[0].field", is("login")))
+                .andExpect(jsonPath("$[0].description",notNullValue()));
     }
 
     @Test
@@ -118,7 +120,8 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.birthday", notNullValue()));
+                .andExpect(jsonPath("$[0].field", is("birthday")))
+                .andExpect(jsonPath("$[0].description",notNullValue()));
     }
 
     @Test
@@ -193,7 +196,8 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateUser)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error", containsString("не найден")));
+                .andExpect(jsonPath("$.field", is("id")))
+                .andExpect(jsonPath("$.description",containsString("не найден")));
     }
 
     @Test
@@ -243,6 +247,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.email", notNullValue()));
+                .andExpect(jsonPath("$[0].field", is("email")))
+                .andExpect(jsonPath("$[0].description",notNullValue()));
     }
 }
