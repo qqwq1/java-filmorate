@@ -13,7 +13,7 @@ public final class CopyUtil {
 
     public void copyNonNullProperties(Object source, Object target) {
         if (source == null) {
-            throw new ValidationException("Ошибка, фильм для обновления не может быть равен null");
+            throw new ValidationException("Ошибка, фильм для обновления не может быть равен null", target);
         }
         String[] nullFieldsNames = getNullFieldsNames(source);
         BeanUtils.copyProperties(source, target, nullFieldsNames);
@@ -25,10 +25,12 @@ public final class CopyUtil {
 
         Set<String> emptyNames = new HashSet<>();
         for (PropertyDescriptor pd : pds) {
-            Object srcValue = src.getPropertyValue(pd.getName());
+            if (pd.getReadMethod() != null) {
+                Object srcValue = src.getPropertyValue(pd.getName());
 
-            if (srcValue == null) {
-                emptyNames.add(pd.getName());
+                if (srcValue == null) {
+                    emptyNames.add(pd.getName());
+                }
             }
         }
 

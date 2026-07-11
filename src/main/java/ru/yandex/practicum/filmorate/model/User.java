@@ -60,41 +60,33 @@ public class User implements Identifiable {
     private LocalDate birthday;
 
     public void addFriend(Long friendId) {
-        if (friendId == null) {
-            throw new ValidationException("id друга не может быть null.");
-        }
         if (friendsIdSet.contains(friendId)) {
-            throw new ValidationException("Ошибка! Пользователь с id=" + friendId + " уже добавлен в друзья.");
+            throw new ValidationException("Ошибка! Пользователь с id=" + friendId + " уже добавлен в друзья.",
+                    friendId);
         }
         friendsIdSet.add(friendId);
     }
 
     public void deleteFriend(Long friendId) {
-        if (friendId == null) {
-            throw new ValidationException("id друга не может быть null.");
-        }
         if (!friendsIdSet.contains(friendId)) {
-            throw new ValidationException("Ошибка! Пользователь с id=" + friendId + " отсутствует в друзьях.");
+            throw new ValidationException("Ошибка! Пользователь с id=" + friendId + " отсутствует в друзьях.",
+                    friendId);
         }
         friendsIdSet.remove(friendId);
     }
 
     public void setFilmLike(Long filmId) {
-        if (filmId == null) {
-            throw new ValidationException("id фильма не может быть null");
-        }
         if (likedFilmIdSet.contains(filmId)) {
-            throw new ValidationException("Ошибка! Фильм с id=" + filmId + " уже отмечен данным пользователем");
+            throw new ValidationException("Ошибка! Фильм с id=" + filmId + " уже отмечен данным пользователем",
+                    filmId);
         }
         likedFilmIdSet.add(filmId);
     }
 
     public void deleteFilmLike(Long filmId) {
-        if (filmId == null) {
-            throw new ValidationException("id фильма не может быть null");
-        }
         if (!likedFilmIdSet.contains(filmId)) {
-            throw new ValidationException("Ошибка! Фильм с id=" + filmId + " не имеет лайка от данного пользователя");
+            throw new ValidationException("Ошибка! Фильм с id=" + filmId + " не имеет лайка от данного пользователя",
+                    filmId);
         }
         likedFilmIdSet.remove(filmId);
     }

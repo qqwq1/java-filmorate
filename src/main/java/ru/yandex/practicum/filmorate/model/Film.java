@@ -65,27 +65,23 @@ public class Film implements Identifiable {
 
     //private Integer likesCount;
 
-    public void setUserLike(Long userId){
-        if (userId == null) {
-            throw new ValidationException("id пользователя не может быть null");
-        }
+    public void setUserLike(Long userId) {
         if (usersLikesIdSet.contains(userId)) {
-            throw new ValidationException("Ошибка! Фильм с id=" + this.id + " уже отмечен данным пользователем");
+            throw new ValidationException("Ошибка! Фильм с id=" + this.id + " уже отмечен данным пользователем",
+                    userId);
         }
         usersLikesIdSet.add(userId);
     }
 
-    public void deleteUserLike(Long userId){
-        if (userId == null) {
-            throw new ValidationException("id пользователя не может быть null");
-        }
+    public void deleteUserLike(Long userId) {
         if (!usersLikesIdSet.contains(userId)) {
-            throw new ValidationException("Ошибка! Фильм с id=" + this.id + " не имеет лайка от данного пользователя");
+            throw new ValidationException("Ошибка! Фильм с id=" + this.id + " не имеет лайка от данного пользователя",
+                    userId);
         }
         usersLikesIdSet.add(userId);
     }
 
-    public int getLikesCount(){
+    public int getLikesCount() {
         return usersLikesIdSet.size();
     }
 }

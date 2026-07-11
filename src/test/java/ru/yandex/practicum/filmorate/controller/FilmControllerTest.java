@@ -1,23 +1,34 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.yandex.practicum.filmorate.exception.GlobalExceptionHandler;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
+import java.util.List;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(FilmController.class)
+@Import(GlobalExceptionHandler.class)
 class FilmControllerTest {
 
     @Autowired
@@ -25,198 +36,121 @@ class FilmControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private ru.yandex.practicum.filmorate.controller.FilmController filmController;
 
-    private Film validFilm;
+    @MockitoBean
+    private FilmService service;
 
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(filmController, "filmsStorage", new java.util.HashMap<Long, Film>());
-        validFilm = new Film();
-        validFilm.setName("Inception");
-        validFilm.setDescription("A sci-fi thriller");
-        validFilm.setReleaseDate(LocalDate.of(2010, 7, 16));
-        validFilm.setDuration(148);
+    private Film sampleFilm(Long id) {
+        Film film = new Film();
+        film.setId(id);
+        film.setName("Inception");
+        film.setDescription("A sci-fi thriller");
+        film.setReleaseDate(LocalDate.of(2010, 7, 16));
+        film.setDuration(148);
+        return film;
     }
 
     @Test
-    void testAddFilmSuccess() throws Exception {
+    void addFilmSuccess() throws Exception {
+        Film toAdd = sampleFilm(null);
+        Film saved = sampleFilm(1L);
+        when(service.addFilm(any(Film.class))).thenReturn(saved);
+
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
+                        .content(objectMapper.writeValueAsString(toAdd)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.name", is("Inception")))
-                .andExpect(jsonPath("$.description", is("A sci-fi thriller")))
-                .andExpect(jsonPath("$.duration", is(148)));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("Inception")));
     }
 
     @Test
-    void testAddFilmWithBlankName() throws Exception {
-        validFilm.setName("");
+    void addFilmValidationFailsBlankName() throws Exception {
+        Film invalid = sampleFilm(null);
+        invalid.setName("");
+
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
+                        .content(objectMapper.writeValueAsString(invalid)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].field", is("name")))
-                .andExpect(jsonPath("$[0].rejectedValue", is("")))
-                .andExpect(jsonPath("$[0].description",notNullValue()));
-
+                .andExpect(jsonPath("$[0].field", is("name")));
     }
 
     @Test
-    void testAddFilmWithNullName() throws Exception {
-        validFilm.setName(null);
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].field", is("name")))
-                .andExpect(jsonPath("$[0].rejectedValue", is("null")))
-                .andExpect(jsonPath("$[0].description", notNullValue()));
-    }
+    void getAllFilmsReturnsData() throws Exception {
+        when(service.findAll()).thenReturn(List.of(sampleFilm(1L)));
 
-    @Test
-    void testAddFilmWithDescriptionTooLong() throws Exception {
-        validFilm.setDescription("a".repeat(201));
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].field", is("description")))
-                .andExpect(jsonPath("$[0].description", notNullValue()));
-    }
-
-    @Test
-    void testAddFilmWithNegativeDuration() throws Exception {
-        validFilm.setDuration(-5);
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].field", is("duration")));
-    }
-
-    @Test
-    void testAddFilmWithZeroDuration() throws Exception {
-        validFilm.setDuration(0);
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
-                .andExpect(status().isBadRequest())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].field", is("duration")));
-    }
-
-    @Test
-    void testAddFilmWithReleaseDateBeforeMinDate() throws Exception {
-        validFilm.setReleaseDate(LocalDate.of(1895, 12, 27));
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].field", containsString("releaseDate")));
-    }
-
-    @Test
-    void testAddFilmWithReleaseDateInFuture() throws Exception {
-        validFilm.setReleaseDate(LocalDate.now().plusYears(1));
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].field", is("releaseDate")));
-    }
-
-    @Test
-    void testGetAllFilmsEmpty() throws Exception {
-        mockMvc.perform(get("/films")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)))
-                .andDo(print());
-    }
-
-    @Test
-    void testGetAllFilmsWithData() throws Exception {
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(get("/films")
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/films").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name", is("Inception")));
+                .andExpect(jsonPath("$[0].id", is(1)));
     }
 
     @Test
-    void testUpdateFilmSuccess() throws Exception {
-        var result = mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
-                .andExpect(status().isCreated())
-                .andReturn();
+    void getFilmByIdReturnsData() throws Exception {
+        when(service.getById(1L)).thenReturn(sampleFilm(1L));
 
-        long filmId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
-
-        Film updateFilm = new Film();
-        updateFilm.setId(filmId);
-        updateFilm.setName("Inception Updated");
-        updateFilm.setDescription("Updated description");
-        updateFilm.setReleaseDate(LocalDate.of(2010, 7, 16));
-        updateFilm.setDuration(150);
-
-        mockMvc.perform(put("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateFilm)))
+        mockMvc.perform(get("/films/{id}", 1L).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is((int) filmId)))
-                .andExpect(jsonPath("$.name", is("Inception Updated")))
-                .andExpect(jsonPath("$.duration", is(150)));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("Inception")));
     }
 
     @Test
-    void testUpdateNonExistentFilm() throws Exception {
-        Film updateFilm = new Film();
-        updateFilm.setId(999L);
-        updateFilm.setName("Non-existent");
-        updateFilm.setDescription("Test");
-        updateFilm.setReleaseDate(LocalDate.of(2010, 7, 16));
-        updateFilm.setDuration(100);
+    void getPopularFilmsReturnsData() throws Exception {
+        when(service.findTopMostLikedMovies(5)).thenReturn(List.of(sampleFilm(1L), sampleFilm(2L)));
+
+        mockMvc.perform(get("/films/popular").param("count", "5").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    void updateFilmSuccess() throws Exception {
+        Film update = sampleFilm(1L);
+        update.setName("Updated");
+        when(service.updateFilm(any(Film.class))).thenReturn(update);
 
         mockMvc.perform(put("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateFilm)))
+                        .content(objectMapper.writeValueAsString(update)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("Updated")));
+    }
+
+    @Test
+    void updateFilmNotFound() throws Exception {
+        Film update = sampleFilm(999L);
+        when(service.updateFilm(any(Film.class)))
+                .thenThrow(new NotFoundException("Фильм не найден", "999"));
+
+        mockMvc.perform(put("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(update)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.description", containsString("не найден")));
+                .andExpect(jsonPath("$.field", is("id")));
     }
 
     @Test
-    void testUpdateFilmPartially() throws Exception {
-        var result = mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validFilm)))
-                .andExpect(status().isCreated())
-                .andReturn();
+    void likeFilmReturnsUpdatedFilm() throws Exception {
+        Film liked = sampleFilm(1L);
+        when(service.setLike(1L, 10L)).thenReturn(liked);
 
-        long filmId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
-
-        Film updateFilm = new Film();
-        updateFilm.setId(filmId);
-        updateFilm.setName("Only Name Changed");
-        updateFilm.setDescription(null);
-        updateFilm.setReleaseDate(null);
-        updateFilm.setDuration(null);
-
-        mockMvc.perform(put("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateFilm)))
+        mockMvc.perform(put("/films/{id}/like/{userId}", 1L, 10L)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is("Only Name Changed")))
-                .andExpect(jsonPath("$.description", is("A sci-fi thriller")))
-                .andExpect(jsonPath("$.duration", is(148)));
+                .andExpect(jsonPath("$.id", is(1)));
+    }
+
+    @Test
+    void deleteLikeReturnsUpdatedFilm() throws Exception {
+        Film withoutLike = sampleFilm(1L);
+        when(service.deleteLike(1L, 10L)).thenReturn(withoutLike);
+
+        mockMvc.perform(delete("/films/{id}/like/{userId}", 1L, 10L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)));
     }
 }

@@ -28,16 +28,15 @@ public class FilmController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Film> findById(@PathVariable("id") Long id){
+    public ResponseEntity<Film> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok()
                 .body(service.getById(id));
     }
 
-    @GetMapping("/popular?count={count}")
+    @GetMapping("/popular")
     public ResponseEntity<List<Film>> findTopMostLikedMovies(
-            @RequestParam(name = "count", required = false) Integer limit){
-        return ResponseEntity.ok()
-                .body(service.findTopMostLikedMovies(limit));
+            @RequestParam(name = "count", required = false) Integer limit) {
+        return ResponseEntity.ok(service.findTopMostLikedMovies(limit));
     }
 
     @PostMapping
@@ -72,7 +71,7 @@ public class FilmController {
     public ResponseEntity<Film> deleteLike(
             @PathVariable("id") Long filmId,
             @PathVariable("userId") Long userId
-    ){
+    ) {
         log.info("Пользователь с id: {} удалил лайк у фильма с id: {}", userId, filmId);
         return ResponseEntity.ok()
                 .body(service.deleteLike(filmId, userId));

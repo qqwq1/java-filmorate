@@ -37,7 +37,7 @@ public abstract class InMemoryStorage<T extends Identifiable> implements BaseSto
     @Override
     public T update(T updatedData) {
         T dataToUpdate = getOrElseThrow(updatedData.getId());
-        copyUtil.copyNonNullProperties(dataToUpdate, updatedData);
+        copyUtil.copyNonNullProperties(updatedData, dataToUpdate);
         return dataToUpdate;
     }
 

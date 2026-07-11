@@ -45,6 +45,13 @@ public class GlobalExceptionHandler {
         return new ErrorResponse("id", ex.getRejectedValue(), ex.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ExceptionHandler(ValidationException.class)
+    public ErrorResponse handleValidationException(ValidationException ex) {
+        log.error("Ошибка при поиске по id: {}", ex.getMessage());
+        return new ErrorResponse("id", ex.getRejectedValue(), ex.getMessage());
+    }
+
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public String handleGeneralException(Exception ex) {

@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface UserStorage extends BaseStorage<User> {
     List<User> findAllFriends(Long id);
+
     List<User> findAllCommonFriends(Long id, Long otherId);
 }
