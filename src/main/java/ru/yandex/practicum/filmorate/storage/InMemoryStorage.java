@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Identifiable;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +52,8 @@ public abstract class InMemoryStorage<T extends Identifiable> implements BaseSto
     }
 
     protected T getOrElseThrow(Long id) {
+        String name = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0].toString();
         return Optional.ofNullable(storage.get(id))
-                .orElseThrow(() -> new NotFoundException("id=" + id + " не найден", id.toString()));
+                .orElseThrow(() -> new NotFoundException(name + " with id=" + id + " не найден", id.toString()));
     }
 }
