@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.groups.Create;
-import ru.yandex.practicum.filmorate.groups.Update;
+import ru.yandex.practicum.filmorate.group.Create;
+import ru.yandex.practicum.filmorate.group.Update;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -65,22 +65,22 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<List<User>> addFriend(
+    public ResponseEntity<?> addFriend(
             @PathVariable("id") Long id,
             @PathVariable("friendId") Long friendId
     ) {
+        service.addFriend(id, friendId);
         log.info("Пользователь с id: {} добавлен в друзья к пользователю с id: {}", id, friendId);
-        return ResponseEntity.ok()
-                .body(service.addFriend(id, friendId));
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<List<User>> deleteFriend(
+    public ResponseEntity<?> deleteFriend(
             @PathVariable("id") Long id,
             @PathVariable("friendId") Long friendId
     ) {
+        service.deleteFriend(id, friendId);
         log.info("Пользователь с id: {} удалил из друзей пользователя с id: {}", id, friendId);
-        return ResponseEntity.ok()
-                .body(service.deleteFriend(id, friendId));
+        return ResponseEntity.ok().build();
     }
 }

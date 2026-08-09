@@ -21,8 +21,8 @@ public abstract class InMemoryStorage<T extends Identifiable> implements BaseSto
     }
 
     @Override
-    public T get(Long dataId) {
-        return getOrElseThrow(dataId);
+    public Optional<T> get(Long dataId) {
+        return Optional.ofNullable(storage.get(dataId));
     }
 
     @Override

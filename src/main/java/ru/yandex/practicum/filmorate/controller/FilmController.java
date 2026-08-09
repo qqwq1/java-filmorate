@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.groups.Create;
-import ru.yandex.practicum.filmorate.groups.Update;
+import ru.yandex.practicum.filmorate.group.Create;
+import ru.yandex.practicum.filmorate.group.Update;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
@@ -30,7 +30,7 @@ public class FilmController {
     @GetMapping("/{id}")
     public ResponseEntity<Film> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok()
-                .body(service.getById(id));
+                .body(service.findById(id));
     }
 
     @GetMapping("/popular")
@@ -62,9 +62,9 @@ public class FilmController {
             @PathVariable("id") Long filmId,
             @PathVariable("userId") Long userId
     ) {
+        service.setLike(filmId, userId);
         log.info("Пользователь с id: {} поставил лайк фильму с id: {}", userId, filmId);
-        return ResponseEntity.ok()
-                .body(service.setLike(filmId, userId));
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}/like/{userId}")
@@ -72,8 +72,8 @@ public class FilmController {
             @PathVariable("id") Long filmId,
             @PathVariable("userId") Long userId
     ) {
+        service.deleteLike(filmId, userId);
         log.info("Пользователь с id: {} удалил лайк у фильма с id: {}", userId, filmId);
-        return ResponseEntity.ok()
-                .body(service.deleteLike(filmId, userId));
+        return ResponseEntity.ok().build();
     }
 }

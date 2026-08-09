@@ -11,7 +11,7 @@ import java.util.Set;
 
 public final class CopyUtil {
 
-    public void copyNonNullProperties(Object source, Object target) {
+    public static void copyNonNullProperties(Object source, Object target) {
         if (source == null) {
             throw new ValidationException("Ошибка, фильм для обновления не может быть равен null", target);
         }
@@ -19,7 +19,7 @@ public final class CopyUtil {
         BeanUtils.copyProperties(source, target, nullFieldsNames);
     }
 
-    private String[] getNullFieldsNames(Object source) {
+    private static String[] getNullFieldsNames(Object source) {
         BeanWrapper src = new BeanWrapperImpl(source);
         PropertyDescriptor[] pds = src.getPropertyDescriptors();
 

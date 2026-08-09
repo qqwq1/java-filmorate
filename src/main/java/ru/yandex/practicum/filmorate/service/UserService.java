@@ -2,7 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.dal.repository.UserRepository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -12,10 +13,10 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class UserService {
-    private final UserStorage userStorage;
+    private final UserRepository repository;
 
     public Collection<User> findAll() {
-        return userStorage.findAll();
+        return repository.findAll();
     }
 
     public User addUser(User userToAdd) {
@@ -24,42 +25,31 @@ public class UserService {
             userToAdd.setName(userToAdd.getLogin());
         }
 
-        return userStorage.add(userToAdd);
+        return repository.add(userToAdd);
     }
 
     public User updateUser(User user) {
-        return userStorage.update(user);
+        return repository.update(user);
     }
 
     public User getById(Long id) {
-        return userStorage.get(id);
+        return repository.get(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден", id.toString()));
     }
 
-    public List<User> addFriend(Long id, Long friendId) {
-        User user = userStorage.get(id);
-        User friend = userStorage.get(friendId);
-
-        user.addFriend(friendId);
-        friend.addFriend(id);
-
-        return List.of(user, friend);
+    public void addFriend(Long userId, Long friendId) {
+        repository.addFriend(userId, friendId);
     }
 
-    public List<User> deleteFriend(Long id, Long friendId) {
-        User user = userStorage.get(id);
-        User friend = userStorage.get(friendId);
-
-        user.deleteFriend(friendId);
-        friend.deleteFriend(id);
-
-        return List.of(user, friend);
+    public void deleteFriend(Long userId, Long friendId) {
+        repository.deleteFriend(userId, friendId);
     }
 
     public List<User> findAllFriends(Long id) {
-        return userStorage.findAllFriends(id);
+        return repository.findAllFriends(id);
     }
 
-    public List<User> findAllCommonFriends(Long id, Long otherId) {
-        return userStorage.findAllCommonFriends(id, otherId);
+    public List<User> findAllCommonFriends(Long firstUserId, Long secondUserId) {
+        return repository.findAllCommonFriends(firstUserId, secondUserId);
     }
 }
