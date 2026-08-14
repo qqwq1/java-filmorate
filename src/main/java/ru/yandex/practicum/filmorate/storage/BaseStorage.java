@@ -4,11 +4,12 @@ package ru.yandex.practicum.filmorate.storage;
 import ru.yandex.practicum.filmorate.model.Identifiable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BaseStorage<T extends Identifiable> {
     T add(T data);
 
-    T get(Long dataId);
+    Optional<T> get(Long dataId);
 
     List<T> findAll();
 
